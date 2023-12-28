@@ -1,38 +1,45 @@
 #include <stdio.h>
 #include <pthread.h>
 
-FILE *rfp = NULL;
-FILE *wfp = NULL;
+const char R_fileName[FILENAME_MAX] = "indata.dat";
+const char W_fileName[FILENAME_MAX] = "otdata.dat";
+int ret = 0;
+char buf;
 
-int main(void){
-
-  const char* R_filePath = "C:\\test_r.txt";
-  const char* W_filePath = "C:\\test_w.txt";
+void *thread_read(void *arg){
   FILE *rfp = NULL;
-  FILE *wfp = NULL;
-  int ret = 0;
-  char c;
-  
-  if(R_filePath = W_filePath){
-    return -1;
-  }
-  
-  rfp = fopen("test_r.txt", r);
-  wfp = fopen("test_w.txt", w);
-  
+  rfp = fopen("indata.dat", "rb");
   if(rfp == NULL){
     printf("failed to fopen():rfp\n");
-    return -1;
   }
+  fread(&buf, sizeof(buf), 1, rfp);
+  return 0;
+}
   
+void *thread_write(void *arg){
+  FILE *wfp = NULL;
+  wfp = fopen("otdata.dat", "wb");
   if(wfp == NULL){
     printf("failed to fopen():wfp\n");
-    return -1;
   }
+  fwrite(&buf, sizeof(buf), 1, wfp);
+  return 0;
+}
+
+int main(void){
   
-  while(fread(&c, sizeof(c), 1, rfp)
+  //thread
+  pthread_t thread_r,thread_w;
+  pthread_create(&thread_r, NULL, thread_read, NULL);
+  pthread_create(&thread_w, NULL, thread_write, NULL);
+  
+  pthread_join(thread_r, NULL);
+  pthread_join(thread_w, NULL);
+  //thread
+  
+  while(fread(&buf, sizeof(buf), 1, rfp) == 1)
   {
-    if(fwrite(&c, sizeof(c), 1, wfp){
+    if(fwrite(&buf, sizeof(buf), 1, wfp) < 1){
       ret = 1;
       break;
     }
@@ -46,9 +53,9 @@ int main(void){
   fclose(wfp);
   
   if(ret == 0){
-    printf("Copied %s to %s\n" R_filePath, W_filePath);
+    printf("Copied %s to %s\n" R_fileName, W_fileName);
   }else{
-    printf("Failed to copy %s to %s\n" R_filePath, W_filePath);
+    printf("Failed to copy %s to %s\n" R_fileName, W_fileName);
   }
   
   getchar();
