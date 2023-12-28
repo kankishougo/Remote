@@ -29,7 +29,8 @@ void *thread_write(void *arg){
 int main(void){
   
   //thread
-  pthread_t thread_r,thread_w;
+  pthread_t thread_r;
+  pthread_t thread_w;
   pthread_create(&thread_r, NULL, thread_read, NULL);
   pthread_create(&thread_w, NULL, thread_write, NULL);
   
